@@ -40,6 +40,7 @@ def create_recipe(user, **params):
     recipe = Recipe.objects.create(user=user, **defaults)
     return recipe
 
+
 def create_user(**params):
     # Create and return user.
     return get_user_model().objects.create_user(**params)
@@ -63,7 +64,10 @@ class PrivateRecipeApiTests(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = create_user(email='user@example.com', password='test123pass')
+        self.user = create_user(
+            email='user@example.com',
+            password='test123pass'
+        )
         self.client.force_authenticate(self.user)
 
     def test_retrive_recipes(self):
@@ -81,7 +85,10 @@ class PrivateRecipeApiTests(TestCase):
 
     def test_recipe_list_limited_to_user(self):
         # Test list of recipes is limited to authenticated user.
-        other_user = create_user(email='other@example.com',password='passpass123')
+        other_user = create_user(
+            email='other@example.com',
+            password='passpass123'
+        )
         create_recipe(user=other_user)
         create_recipe(user=self.user)
 
@@ -114,7 +121,7 @@ class PrivateRecipeApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         recipe = Recipe.objects.get(id=res.data['id'])
-        for k,v in payload.items():
+        for k, v in payload.items():
             self.assertEqual(getattr(recipe, k), v)
         self.assertEqual(recipe.user, self.user)
 
@@ -158,17 +165,20 @@ class PrivateRecipeApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         recipe.refresh_from_db()
-        for k,v in payload.items():
+        for k, v in payload.items():
             self.assertEqual(getattr(recipe, k), v)
         self.assertEqual(recipe.user, self.user)
 
     def test_update_user_return_error(self):
         # Test changing the recipe user results in an error.
-        new_user = create_user(email='user2@example.com', password='test123456')
+        new_user = create_user(
+            email='user2@example.com',
+            password='test123456'
+        )
         recipe = create_recipe(user=self.user)
 
         payload = {
-            'user':new_user.id
+            'user': new_user.id
         }
         url = detail_url(recipe.id)
         self.client.patch(url, payload)
@@ -188,7 +198,10 @@ class PrivateRecipeApiTests(TestCase):
 
     def test_recipe_other_users_recipe_error(self):
         # Test trying to delete another users recipe gives error.
-        new_user = create_user(email='user2@example.com', password='passwordtest123')
+        new_user = create_user(
+            email='user2@example.com',
+            password='passwordtest123'
+        )
         recipe = create_recipe(user=new_user)
 
         url = detail_url(recipe.id)
